@@ -61,6 +61,7 @@ public class ReviewController {
                             @RequestParam String comment,
                             HttpSession session, RedirectAttributes ra) {
         User user = (User) session.getAttribute("loggedInUser");
+      
         try {
             if (user == null) {
                 ra.addFlashAttribute("error", "Please login before submitting a review.");
@@ -110,6 +111,7 @@ public class ReviewController {
         return "redirect:/reviews/add?medicineId=" + review.getMedicine().getId();
     }
 
+  
     @PostMapping("/{id}/edit")
     public String editReview(@PathVariable Long id, @RequestParam int rating,
                              @RequestParam String comment, HttpSession session, RedirectAttributes ra) {
@@ -145,6 +147,7 @@ public class ReviewController {
             return "redirect:/";
         }
     }
+  
 
     @GetMapping("/admin/moderate")
     public String legacyModerationPanel() {
