@@ -9,7 +9,9 @@ import lombok.Setter;
 
 @Entity
 @DiscriminatorValue("NORMAL")
-@Getter @Setter @NoArgsConstructor
+@Getter 
+@Setter 
+@NoArgsConstructor
 public class NormalReview extends Review {
 
     @Column(name = "guest_name")
