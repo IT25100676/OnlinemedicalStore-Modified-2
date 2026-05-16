@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::main})}">
+<body>
+<main>
+  <div class="page-header">
+    <div class="container">
+      <h1>Shopping Cart</h1>
+    </div>
+  </div>
+  <div class="container py-4">
+    <div th:if="${cartItems == null or cartItems.empty}" class="card">
+      <div class="card-body text-center py-5">
+        <h3 class="text-muted mb-3">Your cart is empty</h3>
+        <p class="text-muted">Selected medicines will appear here before checkout.</p>
+        <a th:href="@{/medicines}" class="btn btn-primary mt-2">Browse Medicines</a>
+      </div>
+    </div>
+
+    <div th:if="${cartItems != null and !cartItems.empty}" class="row g-4">
+      <div class="col-lg-8">
+        <div th:if="${prescriptionRequired and !hasSubmittedPrescription}" class="alert alert-warning">
+          <strong>Prescription required.</strong>
+          <span>One or more medicines in your cart require a prescription before checkout.</span>
+        </div>
+        <div th:if="${prescriptionRequired and hasSubmittedPrescription}" class="alert alert-success">
+          <strong>Prescription submitted.</strong>
+          <span>You can proceed to checkout.</span>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Selected Items</h5>
+          </div>
+          <div class="table-responsive">
+            <table class="table mb-0 align-middle">
+              <thead>
+                <tr>
+                  <th>Medicine</th>
+                  <th>Price</th>
+                  <th style="width: 170px;">Quantity</th>
+                  <th>Subtotal</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="entry : ${cartItems}">
+                  <td>
+                    <div class="fw-bold" th:text="${entry.key.name}">Medicine name</div>
+                    <small class="text-muted" th:text="${entry.key.category}">Category</small>
+                    <div th:if="${entry.key.requiresPrescription}" class="mt-1">
+                      <span class="badge bg-warning text-dark">Prescription required</span>
+                    </div>
+                  </td>
+                  <td th:text="'Rs. ' + ${entry.key.price}">Rs. 0.00</td>
+                  <td>
+                    <form th:action="@{/cart/update/{id}(id=${entry.key.id})}" method="post" class="d-flex gap-2">
+                      <input type="number" name="quantity" class="form-control form-control-sm" min="1"
+                             th:max="${entry.key.stock}" th:value="${entry.value}">
+                      <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+                    </form>
+                  </td>
+                  <td class="fw-bold" th:text="'Rs. ' + ${entry.key.price * entry.value}">Rs. 0.00</td>
+                  <td class="text-end">
+                    <form th:action="@{/cart/remove/{id}(id=${entry.key.id})}" method="post">
+                      <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                    </form>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Cart Summary</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-3">
+              <span>Total Items</span>
+              <strong th:text="${cartItemCount}">0</strong>
+            </div>
+            <div class="d-flex justify-content-between fs-5 border-top pt-3">
+              <span>Total</span>
+              <strong class="text-success" th:text="'Rs. ' + ${cartTotal}">Rs. 0.00</strong>
+            </div>
+            <div class="d-grid gap-2 mt-4">
+              <a th:if="${canCheckout}" th:href="@{/checkout}" class="btn btn-primary btn-lg">Proceed to Checkout</a>
+              <a th:unless="${canCheckout}" th:href="@{/prescriptions/upload(returnTo='/cart')}" class="btn btn-warning btn-lg">Upload Prescription</a>
+              <a th:href="@{/medicines}" class="btn btn-outline-secondary">Continue Shopping</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

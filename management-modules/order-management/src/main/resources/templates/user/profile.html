@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::main})}">
+<body>
+<main>
+  <div class="page-header">
+    <div class="container">
+      <h1>User Profile</h1>
+    </div>
+  </div>
+  <div class="container py-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="text-muted small">Username</div>
+            <div class="fw-semibold" th:text="${user != null ? user.username : '-'}">username</div>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small">Email</div>
+            <div class="fw-semibold" th:text="${user != null ? user.email : '-'}">email</div>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small">Phone</div>
+            <div class="fw-semibold" th:text="${user != null && user.phone != null ? user.phone : '-'}">phone</div>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small">Address</div>
+            <div class="fw-semibold" th:text="${user != null && user.address != null ? user.address : '-'}">address</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

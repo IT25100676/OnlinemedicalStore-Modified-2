@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::main})}">
+<body>
+<main>
+    <div class="page-header text-center py-5 glass-header">
+        <div class="container">
+            <h1 class="display-4 fw-bold text-white">Complete Your Payment</h1>
+            <p class="lead text-white-50">Securely process your order #[[${order.id}]]</p>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card premium-card shadow-lg border-0 rounded-4">
+                    <div class="card-body p-5">
+
+                        <!-- Order Summary -->
+                        <div class="order-summary mb-4 p-4 rounded-3 bg-light border">
+                            <h4 class="mb-3 text-primary"><i class="fas fa-receipt me-2"></i>Order Summary</h4>
+                            <div class="d-flex justify-content-between fs-5 mb-2">
+                                <span>Total Amount:</span>
+                                <span class="fw-bold text-success" th:text="'Rs. ' + ${order.totalAmount}"></span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted">
+                                <span>Items:</span>
+                                <span th:text="${order.items.size()}"></span>
+                            </div>
+                        </div>
+
+                        <form th:action="@{/orders/{id}/payment(id=${order.id})}" method="post" id="paymentForm">
+                            <h4 class="mb-4 text-primary"><i class="fas fa-wallet me-2"></i>Select Payment Method</h4>
+
+                            <!-- Payment Type Selection -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="payment-option w-100 p-3 border rounded-3 text-center cursor-pointer transition-all"
+                                           for="payCard" id="labelCard">
+                                        <input class="form-check-input d-none" type="radio" name="paymentType" id="payCard" value="CARD" required onchange="togglePaymentDetails()">
+                                        <div class="fs-4 mb-2">💳</div>
+                                        <div class="fw-bold">Credit / Debit Card</div>
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="payment-option w-100 p-3 border rounded-3 text-center cursor-pointer transition-all"
+                                           for="payCod" id="labelCod">
+                                        <input class="form-check-input d-none" type="radio" name="paymentType" id="payCod" value="COD" required onchange="togglePaymentDetails()">
+                                        <div class="fs-4 mb-2">💵</div>
+                                        <div class="fw-bold">Cash on Delivery</div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Card Details Section (Hidden by default) -->
+                            <div id="cardDetails" class="d-none payment-slide-down">
+                                <h5 class="mb-3">Card Details</h5>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Card Holder Name</label>
+                                        <input type="text" class="form-control premium-input" name="cardHolder" id="cardHolder" placeholder="John Doe">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label class="form-label">Card Number</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-credit-card text-muted"></i></span>
+                                            <input type="text" class="form-control premium-input border-start-0" name="cardNumber" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Card Type</label>
+                                        <select class="form-select premium-input" name="cardType" id="cardType">
+                                            <option value="VISA">Visa</option>
+                                            <option value="MASTERCARD">MasterCard</option>
+                                            <option value="AMEX">Amex</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Expiry Date</label>
+                                        <div class="d-flex gap-2">
+                                            <select class="form-select premium-input" name="expiryMonth" id="expiryMonth">
+                                                <option value="" disabled selected>MM</option>
+                                                <option th:each="m : ${#numbers.sequence(1, 12)}" th:value="${m}" th:text="${#numbers.formatInteger(m, 2)}"></option>
+                                            </select>
+                                            <span class="fs-4 text-muted">/</span>
+                                            <select class="form-select premium-input" name="expiryYear" id="expiryYear">
+                                                <option value="" disabled selected>YYYY</option>
+                                                <option th:each="y : ${#numbers.sequence(2025, 2035)}" th:value="${y}" th:text="${y}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">CVV</label>
+                                        <input type="password" class="form-control premium-input" id="cvv" placeholder="123" maxlength="3">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg premium-btn pulse-hover">
+                                    <i class="fas fa-lock me-2"></i>Pay Securely Now
+                                </button>
+                                <a th:href="@{/orders}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add FontAwesome dynamically for icons if not already included -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        function togglePaymentDetails() {
+            const isCard = document.getElementById('payCard').checked;
+            const cardDetails = document.getElementById('cardDetails');
+            const labelCard = document.getElementById('labelCard');
+            const labelCod = document.getElementById('labelCod');
+
+            // Required attribute toggle
+            document.getElementById('cardHolder').required = isCard;
+            document.getElementById('cardNumber').required = isCard;
+            document.getElementById('cardType').required = isCard;
+            document.getElementById('expiryMonth').required = isCard;
+            document.getElementById('expiryYear').required = isCard;
+
+            if (isCard) {
+                cardDetails.classList.remove('d-none');
+                labelCard.classList.add('border-primary', 'bg-primary', 'bg-opacity-10', 'text-primary');
+                labelCod.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10', 'text-primary');
+            } else {
+                cardDetails.classList.add('d-none');
+                labelCod.classList.add('border-primary', 'bg-primary', 'bg-opacity-10', 'text-primary');
+                labelCard.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10', 'text-primary');
+            }
+        }
+
+        // Auto-format card number
+        document.getElementById('cardNumber').addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+        });
+    </script>
+</main>
+</body>
+</html>

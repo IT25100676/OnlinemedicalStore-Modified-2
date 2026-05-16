@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::main})}">
+<body>
+<main>
+  <div class="page-header">
+    <div class="container">
+      <h1 th:text="${adminRxPage == true ? 'Rx Review Queue' : 'Prescriptions'}">Prescriptions</h1>
+      <p class="text-muted mb-0" th:if="${adminRxPage == true}">Pending prescription uploads that require admin review.</p>
+    </div>
+  </div>
+  <div class="container py-4">
+    <div class="d-flex justify-content-end mb-3" th:if="${currentUser != null and currentUser.roleString != 'ADMIN'}">
+      <a th:href="@{/prescriptions/upload}" class="btn btn-primary">Upload Prescription</a>
+    </div>
+
+    <div th:if="${prescriptions == null or prescriptions.empty}" class="card">
+      <div class="card-body text-center py-5">
+        <h3 class="text-muted mb-3">No prescriptions found</h3>
+        <p class="text-muted">Uploaded prescriptions will appear here.</p>
+        <a th:if="${currentUser != null and currentUser.roleString != 'ADMIN'}"
+           th:href="@{/prescriptions/upload}" class="btn btn-primary mt-2">Upload Prescription</a>
+      </div>
+    </div>
+
+    <div th:if="${prescriptions != null and !prescriptions.empty}" class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0" th:text="${adminRxPage == true ? 'Pending Rx Reviews' : 'Uploaded Prescriptions'}">Uploaded Prescriptions</h5>
+        <span class="text-muted small" th:text="${prescriptions.size()} + ' prescription(s)'">0 prescription(s)</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead>
+            <tr>
+              <th>File</th>
+              <th th:if="${currentUser != null and currentUser.roleString == 'ADMIN'}">Customer</th>
+              <th>Doctor</th>
+              <th>Issue Date</th>
+              <th>Uploaded</th>
+              <th>Status</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="prescription : ${prescriptions}">
+              <td>
+                <div class="fw-bold" th:text="${prescription.fileName}">prescription.pdf</div>
+                <small class="text-muted" th:text="'#' + ${prescription.id}">#1</small>
+              </td>
+              <td th:if="${currentUser != null and currentUser.roleString == 'ADMIN'}"
+                  th:text="${prescription.user != null ? prescription.user.username : 'User unavailable'}">Customer</td>
+              <td th:text="${prescription.doctorName != null and !prescription.doctorName.isBlank() ? prescription.doctorName : 'Not provided'}">Doctor</td>
+              <td>
+                <span th:if="${prescription.issueDate != null}" th:text="${#temporals.format(prescription.issueDate, 'dd MMM yyyy')}">Date</span>
+                <span th:if="${prescription.issueDate == null}" class="text-muted">Not provided</span>
+              </td>
+              <td>
+                <span th:if="${prescription.uploadDate != null}" th:text="${#temporals.format(prescription.uploadDate, 'dd MMM yyyy')}">Date</span>
+                <div class="text-muted small" th:if="${prescription.uploadDate != null}" th:text="${#temporals.format(prescription.uploadDate, 'HH:mm')}">Time</div>
+              </td>
+              <td>
+                <span class="badge"
+                      th:classappend="${prescription.status.name() == 'APPROVED' ? 'bg-success' : (prescription.status.name() == 'REJECTED' ? 'bg-danger' : 'bg-warning')}"
+                      th:text="${prescription.status}">PENDING</span>
+                <div class="text-muted small" th:if="${prescription.notes != null and !prescription.notes.isBlank()}"
+                     th:text="${prescription.notes}">Notes</div>
+              </td>
+              <td class="text-end">
+                <a th:href="@{/prescriptions/{id}/file(id=${prescription.id})}"
+                   class="btn btn-sm btn-outline-primary" target="_blank">View File</a>
+                <a th:if="${currentUser != null and currentUser.roleString == 'ADMIN'}"
+                   th:href="@{/prescriptions/{id}/review(id=${prescription.id})}"
+                   class="btn btn-sm btn-outline-secondary">Review</a>
+                <form th:if="${currentUser != null and (currentUser.roleString == 'ADMIN' or prescription.status.name() == 'PENDING')}"
+                      th:action="@{/prescriptions/{id}/delete(id=${prescription.id})}"
+                      method="post" class="d-inline">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>
