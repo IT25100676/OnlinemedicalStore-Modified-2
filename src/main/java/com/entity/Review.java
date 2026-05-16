@@ -11,7 +11,9 @@ import java.time.LocalDateTime;
 @Table(name = "reviews")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "review_type", discriminatorType = DiscriminatorType.STRING)
-@Getter @Setter @NoArgsConstructor
+@Getter 
+@Setter 
+@NoArgsConstructor
 public abstract class Review implements Serializable {
 
     private static final long serialVersionUID = 1L;
