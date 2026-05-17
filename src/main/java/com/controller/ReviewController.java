@@ -113,7 +113,8 @@ public class ReviewController {
 
   
     @PostMapping("/{id}/edit")
-    public String editReview(@PathVariable Long id, @RequestParam int rating,
+    public String editReview(@PathVariable Long id, 
+                             @RequestParam int rating,
                              @RequestParam String comment, HttpSession session, RedirectAttributes ra) {
         try {
             User user = (User) session.getAttribute("loggedInUser");
@@ -155,10 +156,9 @@ public class ReviewController {
     }
 
     @GetMapping("/admin/reviews")
-    public String managementPanel(@RequestParam(defaultValue = "pending") String status,
-                                  HttpSession session, Model model) {
+    public String managementPanel(@RequestParam(defaultValue = "pending") String status,HttpSession session, Model model) {
         model.addAttribute("reviews", "all".equalsIgnoreCase(status)
-                ? reviewService.findAll() : reviewService.findPendingModeration());
+      ? reviewService.findAll() : reviewService.findPendingModeration());
         model.addAttribute("status", status);
         model.addAttribute("currentUser", session.getAttribute("loggedInUser"));
         return "review/moderate";
