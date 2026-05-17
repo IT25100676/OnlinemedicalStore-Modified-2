@@ -9,7 +9,9 @@ import lombok.Setter;
 
 @Entity
 @DiscriminatorValue("VERIFIED")
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter 
+@NoArgsConstructor
 public class VerifiedReview extends Review {
 
     @Column(name = "order_id_ref")
