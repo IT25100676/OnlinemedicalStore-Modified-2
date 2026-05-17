@@ -17,6 +17,7 @@ import java.util.Map;
 @RequestMapping("/medicines")
 @RequiredArgsConstructor
 public class MedicineController {
+    
 
     private final MedicineService medicineService;
     private final ReviewService reviewService;
