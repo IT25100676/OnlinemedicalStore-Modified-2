@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main})}">
+<body>
+<main>
+
+  <!-- ── Page header ──────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="container d-flex justify-content-between align-items-start">
+      <div>
+        <h1 th:text="${adminRxPage ? 'Review Queue' : 'My Prescriptions'}">Prescriptions</h1>
+        <p class="text-muted mb-0"
+           th:text="${adminRxPage
+             ? 'Prescriptions awaiting pharmacist review.'
+             : 'Track all your uploaded prescription documents.'}">
+          Prescription history.
+        </p>
+      </div>
+
+      <!-- Admin: pending badge + search button -->
+      <div class="d-flex gap-2 align-items-center"
+           th:if="${currentUser != null and currentUser.roleString == 'ADMIN'}">
+        <span class="badge bg-warning text-dark"
+              th:if="${pendingCount > 0}"
+              th:text="${pendingCount} + ' pending'">3 pending</span>
+        <a th:href="@{/prescriptions/admin/review}" class="btn btn-outline-secondary btn-sm">
+          Review Queue
+        </a>
+      </div>
+
+      <!-- Customer: upload button -->
+      <a th:if="${currentUser != null and currentUser.roleString != 'ADMIN'}"
+         th:href="@{/prescriptions/upload}"
+         class="btn btn-primary">
+        + Upload Prescription
+      </a>
+    </div>
+  </div>
+
+  <div class="container py-4">
+
+    <!-- Flash messages -->
+    <div th:if="${error}"   class="alert alert-danger mb-3"  th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success mb-3" th:text="${success}"></div>
+
+    <!-- ── Admin search bar ───────────────────────────────────── -->
+    <div th:if="${currentUser != null and currentUser.roleString == 'ADMIN'}" class="mb-3">
+      <form th:action="@{/prescriptions/search}" method="get"
+            class="d-flex gap-2" style="max-width:420px;">
+        <input type="text" name="q" class="form-control"
+               placeholder="Search by doctor name or customer…"
+               th:value="${searchQuery}" />
+        <button type="submit" class="btn btn-outline-secondary">Search</button>
+        <a th:if="${searchQuery}" th:href="@{/prescriptions}" class="btn btn-outline-danger">✕</a>
+      </form>
+    </div>
+
+    <!-- ── Empty state ────────────────────────────────────────── -->
+    <div th:if="${prescriptions == null or prescriptions.empty}" class="card">
+      <div class="card-body text-center py-5">
+        <div style="font-size:3rem; margin-bottom:1rem;">📋</div>
+        <h3 class="text-muted mb-2"
+            th:text="${adminRxPage ? 'No pending prescriptions' : 'No prescriptions yet'}">
+          No prescriptions
+        </h3>
+        <p class="text-muted mb-3"
+           th:text="${adminRxPage
+             ? 'All prescriptions have been reviewed.'
+             : 'Upload your first prescription to get started.'}">
+        </p>
+        <a th:if="${currentUser != null and currentUser.roleString != 'ADMIN'}"
+           th:href="@{/prescriptions/upload}"
+           class="btn btn-primary">
+          Upload Prescription
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Prescriptions table ────────────────────────────────── -->
+    <div th:if="${prescriptions != null and !prescriptions.empty}" class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+          <span class="dot"></span>
+          <span th:text="${adminRxPage ? 'Pending Prescriptions' : 'Uploaded Prescriptions'}">
+            Prescriptions
+          </span>
+        </span>
+        <span class="text-muted small"
+              th:text="${prescriptions.size()} + ' record(s)'">0 records</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>File</th>
+              <th th:if="${currentUser != null and currentUser.roleString == 'ADMIN'}">
+                Customer
+              </th>
+              <th>Doctor</th>
+              <th>Issue Date</th>
+              <th>Uploaded</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="p : ${prescriptions}">
+
+              <!-- ID -->
+              <td style="color:var(--text-faint); font-family:var(--mono); font-size:.8rem;"
+                  th:text="'#' + ${p.id}">
+                #1
+              </td>
+
+              <!-- File name + size -->
+              <td>
+                <div class="fw-bold" th:text="${p.fileName}">prescription.pdf</div>
+                <small class="text-muted" th:text="${p.fileSizeDisplay}">1.2 MB</small>
+              </td>
+
+              <!-- Customer (admin only) -->
+              <td th:if="${currentUser != null and currentUser.roleString == 'ADMIN'}"
+                  th:text="${p.user != null ? p.user.username : '—'}">
+                customer
+              </td>
+
+              <!-- Doctor -->
+              <td th:text="${p.doctorName != null and !p.doctorName.isBlank()
+                              ? p.doctorName : '—'}">
+                Dr. Silva
+              </td>
+
+              <!-- Issue date -->
+              <td>
+                <span th:if="${p.issueDate != null}"
+                      th:text="${#temporals.format(p.issueDate, 'dd MMM yyyy')}">
+                  01 Jan 2025
+                </span>
+                <span th:if="${p.issueDate == null}" class="text-muted">—</span>
+                <!-- Expiry warning -->
+                <div th:if="${p.expired}"
+                     style="color:var(--danger); font-size:.75rem; margin-top:.1rem;">
+                  ⚠ Expired
+                </div>
+              </td>
+
+              <!-- Upload date -->
+              <td>
+                <span th:if="${p.uploadDate != null}"
+                      th:text="${#temporals.format(p.uploadDate, 'dd MMM yyyy')}">
+                  02 Jan 2025
+                </span>
+                <div class="text-muted" style="font-size:.78rem;"
+                     th:if="${p.uploadDate != null}"
+                     th:text="${#temporals.format(p.uploadDate, 'HH:mm')}">
+                  14:30
+                </div>
+              </td>
+
+              <!-- Status badge + admin notes -->
+              <td>
+                <span class="badge"
+                      th:classappend="${p.statusBadgeClass}"
+                      th:text="${p.statusLabel}">
+                  Pending
+                </span>
+                <div th:if="${p.notes != null and !p.notes.isBlank()}"
+                     style="font-size:.78rem; color:var(--text-muted); margin-top:.25rem; max-width:180px;"
+                     th:text="${p.notes}">
+                  Admin note
+                </div>
+              </td>
+
+              <!-- Actions -->
+              <td class="text-end">
+                <div class="d-flex gap-1 justify-content-end flex-wrap">
+
+                  <!-- View file (always available for owner + admin) -->
+                  <a th:href="@{/prescriptions/{id}/file(id=${p.id})}"
+                     class="btn btn-sm btn-outline-primary"
+                     target="_blank"
+                     title="View uploaded file">
+                    View
+                  </a>
+
+                  <!-- Review (admin only) -->
+                  <a th:if="${currentUser != null and currentUser.roleString == 'ADMIN'}"
+                     th:href="@{/prescriptions/{id}/review(id=${p.id})}"
+                     class="btn btn-sm btn-outline-secondary"
+                     title="Review this prescription">
+                    Review
+                  </a>
+
+                  <!-- Delete button -->
+                  <!-- Admin: can delete any prescription -->
+                  <!-- Customer: can only delete their own PENDING prescriptions -->
+                  <form th:if="${currentUser != null
+                                  and (currentUser.roleString == 'ADMIN'
+                                       or (p.user != null
+                                           and p.user.id == currentUser.id
+                                           and p.editable))}"
+                        th:action="@{/prescriptions/{id}/delete(id=${p.id})}"
+                        method="post"
+                        class="d-inline"
+                        onsubmit="return confirm('Delete this prescription? This cannot be undone.')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                            title="Delete prescription">
+                      Delete
+                    </button>
+                  </form>
+
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /card -->
+
+  </div><!-- /container -->
+</main>
+</body>
+</html>

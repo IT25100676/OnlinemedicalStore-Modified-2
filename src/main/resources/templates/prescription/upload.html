@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main})}">
+<body>
+<main>
+
+  <!-- ── Page header ──────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="container">
+      <h1>Upload Prescription</h1>
+      <p class="text-muted mb-0">
+        Upload a valid prescription image or PDF. Accepted formats: PDF, JPG, PNG (max 10 MB).
+      </p>
+    </div>
+  </div>
+
+  <div class="container py-4">
+
+    <!-- Flash messages -->
+    <div th:if="${error}" class="alert alert-danger mb-3" th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success mb-3" th:text="${success}"></div>
+
+    <!-- ── Info callout ───────────────────────────────────────── -->
+    <div class="card mb-4"
+         style="border-color: var(--info); background: rgba(78,168,222,.07);">
+      <div class="card-body py-3">
+        <p class="mb-0" style="color: var(--info); font-size: .9rem;">
+          <strong>ℹ How prescriptions work</strong><br>
+          After uploading, your prescription will be reviewed by a pharmacist within 24 hours.
+          You will be able to view the review result on your prescriptions page.
+          Prescriptions older than 30 days cannot be approved.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Upload form card ───────────────────────────────────── -->
+    <div class="card">
+      <div class="card-header">
+        <span class="dot"></span> New Prescription Upload
+      </div>
+      <div class="card-body">
+
+        <form method="post"
+              enctype="multipart/form-data"
+              th:action="@{/prescriptions/upload}"
+              id="uploadForm"
+              novalidate>
+
+          <!-- Hidden return-to redirect -->
+          <input type="hidden" name="returnTo" th:value="${returnTo}" />
+
+          <!-- ── File picker ────────────────────────────────── -->
+          <div class="mb-4">
+            <label class="form-label" for="fileInput">
+              Prescription File <span style="color:var(--danger)">*</span>
+            </label>
+
+            <!-- Styled drop-zone -->
+            <div id="dropZone"
+                 style="border: 2px dashed var(--border);
+                        border-radius: var(--radius);
+                        padding: 2.5rem 1.5rem;
+                        text-align: center;
+                        cursor: pointer;
+                        transition: border-color var(--transition), background var(--transition);"
+                 onclick="document.getElementById('fileInput').click()">
+              <div id="dropLabel" style="color: var(--text-muted);">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5"
+                     style="margin-bottom:.75rem; color: var(--accent);">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p class="mb-1" style="font-size:1rem; color: var(--text);">
+                  Click to select or drag &amp; drop a file
+                </p>
+                <p class="mb-0" style="font-size:.8rem;">PDF, JPG, PNG — max 10 MB</p>
+              </div>
+              <div id="filePreview" style="display:none; margin-top:1rem;"></div>
+            </div>
+
+            <input type="file"
+                   id="fileInput"
+                   name="file"
+                   accept=".pdf,.jpg,.jpeg,.png"
+                   required
+                   style="display:none;"
+                   onchange="handleFileSelect(this)" />
+          </div>
+
+          <!-- ── Doctor's name ──────────────────────────────── -->
+          <div class="mb-3">
+            <label class="form-label" for="doctorName">Doctor's Name</label>
+            <input type="text"
+                   id="doctorName"
+                   name="doctorName"
+                   class="form-control"
+                   placeholder="e.g. Dr. Jayasuriya"
+                   maxlength="100" />
+            <div class="form-text">Optional, but helps our pharmacists verify faster.</div>
+          </div>
+
+          <!-- ── Issue date ─────────────────────────────────── -->
+          <div class="mb-4">
+            <label class="form-label" for="issueDate">Prescription Issue Date</label>
+            <input type="date"
+                   id="issueDate"
+                   name="issueDate"
+                   class="form-control"
+                   th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" />
+            <div class="form-text">
+              Prescriptions issued more than 30 days ago cannot be approved.
+            </div>
+          </div>
+
+          <!-- ── Submit row ─────────────────────────────────── -->
+          <div class="d-flex gap-2 align-items-center">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              Upload Prescription
+            </button>
+            <a th:href="@{/prescriptions}" class="btn btn-outline-secondary">Cancel</a>
+            <span id="uploading" style="display:none; color:var(--text-muted); font-size:.9rem; margin-left:.5rem;">
+              Uploading…
+            </span>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</main>
+
+<script>
+  // ── Drop-zone drag-and-drop ────────────────────────────────────
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--accent)';
+    dropZone.style.background  = 'var(--accent-glow)';
+  });
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = 'var(--border)';
+    dropZone.style.background  = '';
+  });
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--border)';
+    dropZone.style.background  = '';
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      handleFileSelect(fileInput);
+    }
+  });
+
+  // ── File selected: show preview / name ────────────────────────
+  function handleFileSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // Client-side size check
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File is too large (max 10 MB). Please choose a smaller file.');
+      input.value = '';
+      return;
+    }
+
+    document.getElementById('dropLabel').style.display = 'none';
+    const preview = document.getElementById('filePreview');
+    preview.style.display = 'block';
+
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.innerHTML = `
+          <img src="${e.target.result}" alt="Preview"
+               style="max-height:200px; border-radius:var(--radius); border:1px solid var(--border);" />
+          <p style="margin-top:.5rem; color:var(--text-muted); font-size:.85rem;">
+            📎 ${file.name} (${formatSize(file.size)})
+          </p>`;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      preview.innerHTML = `
+        <div style="color:var(--accent); font-size:2rem;">📄</div>
+        <p style="color:var(--text); margin:.25rem 0 0;">
+          ${file.name}
+        </p>
+        <p style="color:var(--text-muted); font-size:.8rem;">${formatSize(file.size)}</p>`;
+    }
+
+    dropZone.style.borderColor = 'var(--accent)';
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/1048576).toFixed(1) + ' MB';
+  }
+
+  // ── Show spinner on submit ─────────────────────────────────────
+  document.getElementById('uploadForm').addEventListener('submit', () => {
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('uploading').style.display = 'inline';
+  });
+</script>
+</body>
+</html>
