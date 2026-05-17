@@ -1,0 +1,30 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/IT25101745/OnlinemedicalStore-Modified-2.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+	vscode-merge-base = origin/main
+[branch "Dylan"]
+	remote = origin
+	merge = refs/heads/Dylan
+	vscode-merge-base = origin/Dylan
+[branch "Sandun"]
+	remote = origin
+	merge = refs/heads/Sandun
+	vscode-merge-base = origin/Sandun
+[branch "Deenuka"]
+	remote = origin
+	merge = refs/heads/Deenuka
+	vscode-merge-base = origin/Deenuka
+[branch "all"]
+	remote = origin
+	merge = refs/heads/all
+	vscode-merge-base = origin/all
