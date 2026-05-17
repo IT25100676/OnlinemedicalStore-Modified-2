@@ -21,17 +21,21 @@ public class ReviewService {
         return reviewRepository.findByMedicineAndApprovedTrue(medicine);
     }
 
-    public List<Review> findByUser(User user) { return reviewRepository.findByUser(user); }
+    public List<Review> findByUser(User user) {
+        return reviewRepository.findByUser(user); }
 
     public List<Review> findByUserAndMedicine(User user, Medicine medicine) {
         return reviewRepository.findByUserAndMedicine(user, medicine);
     }
 
-    public List<Review> findPendingModeration() { return reviewRepository.findByApprovedFalse(); }
+    public List<Review> findPendingModeration() {
+        return reviewRepository.findByApprovedFalse(); }
 
-    public List<Review> findAll() { return reviewRepository.findAllByOrderByReviewDateDesc(); }
+    public List<Review> findAll() {
+        return reviewRepository.findAllByOrderByReviewDateDesc(); }
 
-    public Optional<Review> findById(Long id) { return reviewRepository.findById(id); }
+    public Optional<Review> findById(Long id) {
+        return reviewRepository.findById(id); }
 
     public Double getAverageRating(Medicine medicine) {
         return reviewRepository.findAverageRatingByMedicine(medicine);
@@ -55,7 +59,7 @@ public class ReviewService {
         review.setMedicine(medicine);
         review.setRating(Math.max(1, Math.min(5, rating)));
         review.setComment(comment);
-        review.setApproved(false); // requires moderation
+        review.setApproved(false);
         return reviewRepository.save(review);
     }
 
@@ -67,7 +71,8 @@ public class ReviewService {
     }
 
     @Transactional
-    public void delete(Long id) { reviewRepository.deleteById(id); }
+    public void delete(Long id) {
+        reviewRepository.deleteById(id); }
 
     @Transactional
     public Review update(Long id, int rating, String comment) {
@@ -75,7 +80,7 @@ public class ReviewService {
         r.setRating(Math.max(1, Math.min(5, rating)));
         r.setComment(comment);
         r.setReviewDate(LocalDateTime.now());
-        r.setApproved(false); // re-moderate after edit
+        r.setApproved(false); 
         return reviewRepository.save(r);
     }
 
