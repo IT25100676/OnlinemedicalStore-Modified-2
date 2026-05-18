@@ -1,4 +1,4 @@
-package com.example.OnlineMedicalStore.controller
+package com.example.OnlineMedicalStore.controller;
 
 import com.example.OnlineMedicalStore.entity.*;
 import com.example.OnlineMedicalStore.service.MedicineService;
