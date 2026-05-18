@@ -1,247 +1,55 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout(~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::main})}">
 <body>
 <main>
-
-  <!-- ── Page header ──────────────────────────────────────────── -->
   <div class="page-header">
     <div class="container">
       <h1>Review Prescription</h1>
-      <p class="text-muted mb-0">
-        Prescription #<span th:text="${prescription.id}">1</span>
-        — uploaded by
-        <strong th:text="${prescription.user != null ? prescription.user.username : 'Unknown'}">
-          customer
-        </strong>
-      </p>
+      <p class="text-muted mb-0" th:text="${prescription.fileName}">Prescription file</p>
     </div>
   </div>
-
   <div class="container py-4">
-
-    <!-- Flash messages -->
-    <div th:if="${error}"   class="alert alert-danger mb-3"  th:text="${error}"></div>
-    <div th:if="${success}" class="alert alert-success mb-3" th:text="${success}"></div>
-
-    <!-- ── Expiry warning ─────────────────────────────────────── -->
-    <div th:if="${prescription.expired}"
-         class="alert mb-4"
-         style="border-color:var(--danger); background:rgba(255,77,106,.08); color:var(--danger);">
-      <strong>⚠ Expired Prescription</strong>
-      This prescription was issued more than 30 days ago and <strong>cannot be approved</strong>.
-      You may reject it and ask the customer to upload a newer one.
-    </div>
-
     <div class="row g-4">
-
-      <!-- ── LEFT: Prescription details + file preview ─────────── -->
       <div class="col-lg-7">
         <div class="card h-100">
-          <div class="card-header">
-            <span class="dot"></span> Prescription Details
-          </div>
+          <div class="card-header"><span class="dot"></span> Prescription File</div>
           <div class="card-body">
-
-            <!-- Detail rows -->
-            <table class="table table-sm mb-4" style="color:var(--text);">
-              <tbody>
-                <tr>
-                  <th style="width:140px; color:var(--text-muted); font-weight:500;">Customer</th>
-                  <td th:text="${prescription.user != null ? prescription.user.username : '—'}">
-                    customer
-                  </td>
-                </tr>
-                <tr>
-                  <th style="color:var(--text-muted); font-weight:500;">Doctor</th>
-                  <td th:text="${prescription.doctorName != null and !prescription.doctorName.isBlank()
-                                  ? prescription.doctorName : 'Not provided'}">
-                    Dr. Silva
-                  </td>
-                </tr>
-                <tr>
-                  <th style="color:var(--text-muted); font-weight:500;">Issue Date</th>
-                  <td>
-                    <span th:if="${prescription.issueDate != null}"
-                          th:text="${#temporals.format(prescription.issueDate, 'dd MMM yyyy')}">
-                      01 Jan 2025
-                    </span>
-                    <span th:if="${prescription.issueDate == null}" class="text-muted">
-                      Not provided
-                    </span>
-                    <span th:if="${prescription.expired}"
-                          style="color:var(--danger); font-size:.8rem; margin-left:.4rem;">
-                      (Expired)
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <th style="color:var(--text-muted); font-weight:500;">Uploaded</th>
-                  <td>
-                    <span th:if="${prescription.uploadDate != null}"
-                          th:text="${#temporals.format(prescription.uploadDate, 'dd MMM yyyy, HH:mm')}">
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <th style="color:var(--text-muted); font-weight:500;">File</th>
-                  <td>
-                    <span th:text="${prescription.fileName}">file.pdf</span>
-                    <span class="text-muted" style="font-size:.8rem;"
-                          th:text="' (' + ${prescription.fileSizeDisplay} + ')'">
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <th style="color:var(--text-muted); font-weight:500;">Status</th>
-                  <td>
-                    <span class="badge"
-                          th:classappend="${prescription.statusBadgeClass}"
-                          th:text="${prescription.statusLabel}">
-                      Pending
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <!-- File preview / open button -->
-            <div th:if="${prescription.previewable}">
-              <!-- Image inline preview -->
-              <div th:if="${prescription.contentType != null
-                             and prescription.contentType.startsWith('image/')}">
-                <p style="color:var(--text-muted); font-size:.85rem; margin-bottom:.5rem;">
-                  Prescription Image Preview
-                </p>
-                <img th:src="@{/prescriptions/{id}/file(id=${prescription.id})}"
-                     alt="Prescription"
-                     style="max-width:100%; max-height:320px;
-                            border-radius:var(--radius);
-                            border:1px solid var(--border);" />
-              </div>
-
-              <!-- PDF open in new tab -->
-              <div th:if="${prescription.contentType == 'application/pdf'}">
-                <p style="color:var(--text-muted); font-size:.85rem; margin-bottom:.5rem;">
-                  PDF Document
-                </p>
-                <a th:href="@{/prescriptions/{id}/file(id=${prescription.id})}"
-                   target="_blank"
-                   class="btn btn-outline-primary">
-                  📄 Open PDF in New Tab
-                </a>
-              </div>
-            </div>
-
-            <!-- Non-previewable file -->
-            <div th:if="${!prescription.previewable}">
-              <a th:href="@{/prescriptions/{id}/file(id=${prescription.id})}"
-                 target="_blank"
-                 class="btn btn-outline-primary">
-                ⬇ Download / Open File
-              </a>
-            </div>
-
+            <p><strong>Customer:</strong> <span th:text="${prescription.user != null ? prescription.user.username : 'Unavailable'}">Customer</span></p>
+            <p><strong>Doctor:</strong> <span th:text="${prescription.doctorName != null and !prescription.doctorName.isBlank() ? prescription.doctorName : 'Not provided'}">Doctor</span></p>
+            <p><strong>Issue date:</strong>
+              <span th:if="${prescription.issueDate != null}" th:text="${#temporals.format(prescription.issueDate, 'dd MMM yyyy')}">Date</span>
+              <span th:if="${prescription.issueDate == null}">Not provided</span>
+            </p>
+            <p><strong>Status:</strong> <span class="badge bg-warning" th:text="${prescription.status}">PENDING</span></p>
+            <a th:href="@{/prescriptions/{id}/file(id=${prescription.id})}" target="_blank" class="btn btn-outline-primary">Open Uploaded File</a>
           </div>
         </div>
-      </div><!-- /col -->
-
-      <!-- ── RIGHT: Admin decision form ────────────────────────── -->
+      </div>
       <div class="col-lg-5">
         <div class="card h-100">
-          <div class="card-header">
-            <span class="dot"></span> Admin Decision
-          </div>
-          <div class="card-body d-grid gap-3">
-
-            <form th:action="@{/prescriptions/{id}/review(id=${prescription.id})}"
-                  method="post">
-
-              <!-- Status selector -->
+          <div class="card-header"><span class="dot"></span> Admin Decision</div>
+          <div class="card-body">
+            <form th:action="@{/prescriptions/{id}/review(id=${prescription.id})}" method="post" class="d-grid gap-3">
               <div>
-                <label class="form-label" for="statusSelect">Decision</label>
-                <select id="statusSelect" name="status" class="form-select" required
-                        onchange="handleStatusChange(this.value)">
-                  <option value="APPROVED"
-                          th:selected="${prescription.status.name() == 'APPROVED'}">
-                    ✓ Approve
-                  </option>
-                  <option value="REJECTED"
-                          th:selected="${prescription.status.name() == 'REJECTED'}">
-                    ✗ Reject
-                  </option>
-                  <option value="PENDING"
-                          th:selected="${prescription.status.name() == 'PENDING'}">
-                    ⏳ Keep Pending
-                  </option>
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select" required>
+                  <option value="APPROVED">Approve</option>
+                  <option value="REJECTED">Reject</option>
+                  <option value="PENDING">Keep Pending</option>
                 </select>
               </div>
-
-              <!-- Notes (required for REJECTED, optional otherwise) -->
               <div>
-                <label class="form-label" for="notesArea">
-                  Notes
-                  <span id="notesRequired"
-                        style="color:var(--danger); display:none;"> *</span>
-                  <span style="color:var(--text-muted); font-size:.8rem;"
-                        id="notesHint">(optional)</span>
-                </label>
-                <textarea id="notesArea"
-                          name="notes"
-                          class="form-control"
-                          rows="5"
-                          th:text="${prescription.notes}"
-                          placeholder="Write a note for the customer (required if rejecting)…">
-                </textarea>
-                <div id="rejectWarning"
-                     style="display:none; color:var(--danger); font-size:.8rem; margin-top:.25rem;">
-                  A reason is required when rejecting a prescription.
-                </div>
+                <label class="form-label">Notes</label>
+                <textarea name="notes" class="form-control" rows="5" th:text="${prescription.notes}" placeholder="Optional notes for the customer"></textarea>
               </div>
-
-              <!-- Action buttons -->
-              <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary" id="saveBtn">
-                  Save Decision
-                </button>
-                <a th:href="@{/prescriptions/admin/review}"
-                   class="btn btn-outline-secondary">
-                  ← Back to Review Queue
-                </a>
-              </div>
-
+              <button type="submit" class="btn btn-primary">Save Decision</button>
+              <a th:href="@{/prescriptions/admin/review}" class="btn btn-outline-secondary">Back to Rx Queue</a>
             </form>
           </div>
         </div>
-      </div><!-- /col -->
-
-    </div><!-- /row -->
-  </div><!-- /container -->
+      </div>
+    </div>
+  </div>
 </main>
-
-<script>
-  // Highlight the notes field requirement when REJECTED is selected
-  function handleStatusChange(value) {
-    const notesRequired = document.getElementById('notesRequired');
-    const notesHint     = document.getElementById('notesHint');
-    const rejectWarning = document.getElementById('rejectWarning');
-    const notesArea     = document.getElementById('notesArea');
-
-    if (value === 'REJECTED') {
-      notesRequired.style.display = 'inline';
-      notesHint.style.display     = 'none';
-      rejectWarning.style.display = 'block';
-      notesArea.setAttribute('required', 'required');
-    } else {
-      notesRequired.style.display = 'none';
-      notesHint.style.display     = 'inline';
-      rejectWarning.style.display = 'none';
-      notesArea.removeAttribute('required');
-    }
-  }
-
-  // Run on page load to reflect pre-selected status
-  handleStatusChange(document.getElementById('statusSelect').value);
-</script>
 </body>
 </html>
