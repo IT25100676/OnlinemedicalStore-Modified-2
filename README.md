@@ -5,6 +5,9 @@ medical store
 
 ```bat
 mvnw.cmd spring-boot:run
+
+# if  does not work this command try  this....
+.\mvnw.cmd spring-boot:run
 ```
 
 If port 8080 is already in use:
