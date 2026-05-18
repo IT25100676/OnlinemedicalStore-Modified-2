@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::main})}">
+<body>
+<main>
+  <div class="page-header">
+    <div class="container">
+      <h1>Admin Dashboard</h1>
+      <p class="text-muted mb-0">Manage store operations, customer accounts, admin accounts, and review moderation.</p>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    <div class="stats-grid">
+      <a class="stat-card accent text-decoration-none" th:href="@{/admin/users}">
+        <span class="stat-icon">Users</span>
+        <span class="stat-value" th:text="${totalUsers}">0</span>
+        <span class="stat-label">Customer records</span>
+      </a>
+      <a class="stat-card info text-decoration-none" th:href="@{/admin/users}">
+        <span class="stat-icon">Admins</span>
+        <span class="stat-value" th:text="${totalAdmins}">0</span>
+        <span class="stat-label">Separate admin database</span>
+      </a>
+      <a class="stat-card warning text-decoration-none" th:href="@{/reviews/admin/reviews}">
+        <span class="stat-icon">Reviews</span>
+        <span class="stat-value" th:text="${pendingReviews}">0</span>
+        <span class="stat-label">Pending moderation</span>
+      </a>
+      <a class="stat-card muted text-decoration-none" th:href="@{/medicines}">
+        <span class="stat-icon">Stock</span>
+        <span class="stat-value" th:text="${totalMedicines}">0</span>
+        <span class="stat-label">Medicines listed</span>
+      </a>
+      <a class="stat-card danger text-decoration-none" th:href="@{/prescriptions/admin/review}">
+        <span class="stat-icon">Rx</span>
+        <span class="stat-value" th:text="${pendingPrescriptions}">0</span>
+        <span class="stat-label">Pending prescriptions</span>
+      </a>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-header"><span class="dot"></span> Management</div>
+          <div class="card-body d-grid gap-2">
+            <a th:href="@{/admin/users}" class="btn btn-primary">Manage Users and Admins</a>
+            <a th:href="@{/reviews/admin/reviews}" class="btn btn-outline-primary">Manage Reviews</a>
+            <a th:href="@{/medicines/add}" class="btn btn-outline-primary">Add Medicine</a>
+            <a th:href="@{/orders}" class="btn btn-outline-primary">Manage Orders</a>
+            <a th:href="@{/prescriptions}" class="btn btn-outline-primary">Manage Prescriptions</a>
+            <a th:href="@{/orders/payment-history}" class="btn btn-outline-primary">Manage Payments</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-header"><span class="dot"></span> Review Status</div>
+          <div class="card-body">
+            <p class="mb-2">Total reviews: <strong th:text="${totalReviews}">0</strong></p>
+            <p class="mb-0">Pending reviews: <strong th:text="${pendingReviews}">0</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>
