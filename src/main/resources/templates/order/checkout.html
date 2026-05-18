@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::main})}">
+<body>
+<main>
+  <div class="page-header">
+    <div class="container">
+      <h1>Checkout</h1>
+    </div>
+  </div>
+  <div class="container py-4">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Review Selected Items</h5>
+          </div>
+          <div class="table-responsive">
+            <table class="table mb-0 align-middle">
+              <thead>
+                <tr>
+                  <th>Medicine</th>
+                  <th>Quantity</th>
+                  <th>Unit Price</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="entry : ${cartItems}">
+                  <td>
+                    <div class="fw-bold" th:text="${entry.key.name}">Medicine name</div>
+                    <small class="text-muted" th:text="${entry.key.category}">Category</small>
+                    <div th:if="${entry.key.requiresPrescription}" class="mt-1">
+                      <span class="badge bg-success">Prescription submitted</span>
+                    </div>
+                  </td>
+                  <td th:text="${entry.value}">1</td>
+                  <td th:text="'Rs. ' + ${entry.key.price}">Rs. 0.00</td>
+                  <td class="fw-bold" th:text="'Rs. ' + ${entry.key.price * entry.value}">Rs. 0.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Delivery Details</h5>
+          </div>
+          <div class="card-body">
+            <form th:action="@{/checkout}" method="post">
+              <div class="mb-3">
+                <label class="form-label">Delivery Address</label>
+                <textarea name="deliveryAddress" class="form-control" rows="4" required
+                          th:text="${currentUser != null ? currentUser.address : ''}"></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Order Notes</label>
+                <textarea name="notes" class="form-control" rows="3" placeholder="Optional delivery notes"></textarea>
+              </div>
+              <div class="d-flex justify-content-between fs-5 border-top pt-3 mb-4">
+                <span>Total</span>
+                <strong class="text-success" th:text="'Rs. ' + ${cartTotal}">Rs. 0.00</strong>
+              </div>
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">Place Order and Pay</button>
+                <a th:href="@{/cart}" class="btn btn-outline-secondary">Back to Cart</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>
