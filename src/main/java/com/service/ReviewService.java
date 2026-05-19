@@ -70,9 +70,6 @@ public class ReviewService {
         reviewRepository.save(r);
     }
 
-    @Transactional
-    public void delete(Long id) {
-        reviewRepository.deleteById(id); }
 
     @Transactional
     public Review update(Long id, int rating, String comment) {
@@ -95,4 +92,8 @@ public class ReviewService {
         }
         return update(id, rating, comment);
     }
+
+      @Transactional
+    public void delete(Long id) {
+        reviewRepository.deleteById(id); }
 }
